@@ -9,23 +9,31 @@ public abstract class SwordController : MonoBehaviour {
 	public float maxAirTime = 0.3f;
 	public float jumpHoldFactor = 15f;
 
-	protected bool facingLeft;
+	public bool facingLeft;
 
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
-	protected bool grounded;
+	public bool grounded;
 
 	Collider2D sword;
 
-	protected bool attacking;
-	float atkTime;
+	public bool attacking;
+	public bool atkSet;
+	public float atkTime;
 	public float atkStart;
 	public float atkStop;
 
-	protected bool defending;
-	float bashTime;
+	public bool defending;
+	public float bashTime;
+	public bool bashing;
 
-	protected int hp;
+	public bool disabled;
+	public float disableTime;
+
+	public int hp;
+	public bool gotHit;
+
+	public bool jumping;
 
 	Animator anim;
 
@@ -45,21 +53,42 @@ public abstract class SwordController : MonoBehaviour {
 				sword.enabled = false;
 				attacking = false;
 			}
-			else if (atkTime > atkStart && !sword.enabled)
+			else if (atkTime > atkStart && !sword.enabled && !atkSet)
+			{
 				sword.enabled = true;
+				atkSet = true;
+			}
+		}
+		else if (bashing)
+		{
+			bashTime -= Time.deltaTime;
+			if (bashTime < 0)
+				bashing = false;
+		}
+		else if (disabled)
+		{
+			disableTime -= Time.deltaTime;
+			if (disableTime <= 0)
+			{
+				disabled = false;
+				anim.SetBool("Disabled", false);
+			}
 		}
 	}
-
 
 	protected abstract float HorizontalInputMethod ();
 
 	protected virtual void FixedUpdate () 
 	{
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
-
-		float move = HorizontalInputMethod();
+		float move;
+		if (attacking || disabled || defending || bashing)
+			move = 0;
+		else
+			move = HorizontalInputMethod();
 
 		anim.SetFloat("XSpd", Mathf.Abs(move));
+		anim.SetFloat("YSpd", Mathf.Abs(rigidbody2D.velocity.y));
 
 		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 
@@ -73,6 +102,15 @@ public abstract class SwordController : MonoBehaviour {
 
 	IEnumerator Jump()
 	{
+		if (attacking || disabled || bashing || !grounded || jumping)
+			yield break;
+		else if (defending)
+		{
+			defending = false;
+			anim.SetBool("Def", false);
+		}
+
+		jumping = true;
 		float airTime = 0f;
 		rigidbody2D.AddForce(new Vector2(0, jumpForce));
 
@@ -84,6 +122,7 @@ public abstract class SwordController : MonoBehaviour {
 		}
 		while (JumpInputMethod() && airTime < maxAirTime);
 
+		jumping = false;
 		rigidbody2D.AddForce(new Vector2(0, -jumpForce/2));
 	}
 	
@@ -97,22 +136,73 @@ public abstract class SwordController : MonoBehaviour {
 
 	protected void Atk ()
 	{
+		if (disabled || !grounded || bashing || attacking)
+			return;
+		else if (defending)
+		{
+			defending = false;
+			anim.SetBool("Def", false);
+		}
+
 		anim.SetTrigger("Atk");
 		attacking = true;
+		atkSet = false;
 		atkTime = 0;
+	}
+
+	protected void Defend ()
+	{
+		if (attacking || !grounded || bashing || disabled)
+			return;
+
+		defending = true;
+		anim.SetBool("Def", true);
+	}
+
+	protected void Bash ()
+	{
+		if (!defending)
+			return;
+		
+		anim.SetTrigger("Bash");
+		anim.SetBool("Def", false);
+		defending = false;
+		bashing = true;
+		bashTime = 0.5f;
 	}
 
 	protected abstract void Death ();
 
-	public void GotHit()
+	protected virtual void Bashed ()
+	{
+	}
+
+	public bool GotHit()
 	{
 		if (defending)
-			bashTime = 0.3f;
+			return false;
+		else if (bashTime > 0)
+		{
+			Bashed ();
+			return true;
+		}
 		else
 		{
 			hp --;
 			if (hp <= 0)
 				Death ();
+			disabled = false;
+			disableTime = 0;
+			gotHit = true;
+			return false;
 		}
+	}
+
+	public void GotBashed ()
+	{
+		disabled = true;
+		disableTime = 0.4f;
+		anim.SetBool("Disabled", true);
+		attacking = false;
 	}
 }

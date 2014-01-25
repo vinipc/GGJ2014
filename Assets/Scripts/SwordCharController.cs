@@ -2,11 +2,11 @@
 using System.Collections;
 
 public class SwordCharController : SwordController {
-	public static Transform playerPos;
+	public static SwordCharController instance;
 
 	void Awake ()
 	{
-		SwordCharController.playerPos = transform;
+		SwordCharController.instance = this;
 	}
 
 	protected override void Start ()
@@ -19,7 +19,7 @@ public class SwordCharController : SwordController {
 	{
 		base.Update();
 
-		if(Input.GetButtonDown("Jump") && grounded)
+		if(Input.GetButtonDown("Jump"))
 		{
 			StartCoroutine("Jump");
 		}
@@ -27,6 +27,14 @@ public class SwordCharController : SwordController {
 		else if (Input.GetButtonDown("Fire1"))
 		{
 			Atk();
+		}
+		else if (Input.GetButtonDown("Fire2"))
+		{
+			Defend();
+		}
+		else if (Input.GetButtonUp("Fire2"))
+		{
+			Bash();
 		}
 	}
 	

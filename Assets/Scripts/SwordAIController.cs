@@ -9,29 +9,58 @@ public class SwordAIController : SwordController {
 	public Transform forwardCheck;
 	float distance;
 
+	public float defTime;
+	public float atkChance;
+	public bool mustAtk;
+	public float defendChance;
+
 	protected override void Start ()
 	{
 		hp = 1;
 		base.Start ();
 	}
 
-	protected override void Update()
+	void LateUpdate ()
 	{
-		base.Update();
-
-		distance = (transform.position - SwordCharController.playerPos.position).sqrMagnitude;
-		if(Input.GetButtonDown("Jump") && grounded && distance < minDistance)
+		distance = (transform.position - SwordCharController.instance.transform.position).sqrMagnitude;
+		if(SwordCharController.instance.grounded && Input.GetButtonDown("Jump") && SwordCharController.instance.jumping && distance < minDistance)
 		{
 			StartCoroutine("Jump");
 		}
+
+		if (defending)
+		{
+			defTime -= Time.deltaTime;
+			if (defTime <= 0)
+				Bash();
+		}
+		if (distance < atkDistance && !attacking && grounded && !disabled && !defending && !bashing)
+		{
+			float rand = Random.value;
+			if (rand < atkChance || mustAtk)
+			{
+				mustAtk = false;
+				Atk();
+			}
+			else if (rand < defendChance)
+			{
+				Defend();
+				defTime = Random.value * 5 + 1;
+			}
+		}
+	}
+
+	protected override void Bashed ()
+	{
+		mustAtk = true;
 	}
 
 	protected override void FixedUpdate()
 	{
-		distance = (transform.position - SwordCharController.playerPos.position).sqrMagnitude;
+		distance = (transform.position - SwordCharController.instance.transform.position).sqrMagnitude;
 		base.FixedUpdate();
 	}
-	
+
 	protected override float HorizontalInputMethod ()
 	{
 		float move = 0;
@@ -40,7 +69,7 @@ public class SwordAIController : SwordController {
 			move = 0;
 		else if (distance < minDistance)
 		{
-			if (transform.position.x > SwordCharController.playerPos.position.x)
+			if (transform.position.x > SwordCharController.instance.transform.position.x)
 				move = -1;
 			else
 				move = 1;
