@@ -19,6 +19,8 @@ public abstract class JumperController : MonoBehaviour {
 
 	protected virtual void Update()
 	{
+		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+
 		if(GetJumpInputDown())
 		{
 			if(grounded)
@@ -31,10 +33,8 @@ public abstract class JumperController : MonoBehaviour {
 			Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, Camera.main.transform.position.z);
 	}
 
-	void FixedUpdate () 
+	protected virtual void FixedUpdate () 
 	{
-		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
-
 		float move = GetHorizontalInput();
 
 		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
@@ -66,7 +66,19 @@ public abstract class JumperController : MonoBehaviour {
 	{
 		rigidbody2D.AddForce (new Vector2(0, -2f*jumpForce));
 	}
-	
+
+	void OnCollisionEnter2D(Collision2D collision)
+	{
+		JumperController otherJumper = collision.collider.GetComponent<JumperController>();
+		if(otherJumper == null)
+			return;
+		
+		if(transform.position.y > collision.collider.transform.position.y + 0.5f)
+		{
+			otherJumper.GetHit();
+		}
+	}
+
 	void Flip()
 	{
 		facingLeft = !facingLeft;
@@ -78,4 +90,5 @@ public abstract class JumperController : MonoBehaviour {
 	protected abstract bool GetJumpInput();
 	protected abstract bool GetJumpInputDown();
 	protected abstract float GetHorizontalInput();
+	public abstract void GetHit();
 }

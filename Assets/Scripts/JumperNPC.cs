@@ -2,32 +2,43 @@
 using System.Collections;
 
 public class JumperNPC : JumperController {
-	public float chasingDist, attackDist;
+	public Transform fallCheck;
+	public Collider2D kickdownCheck;
+	public Collider2D jumpCheck;
 
-	protected override void Update()
+	private float move;
+
+	protected void Start()
 	{
-
+		move = 1;
 	}
 
-	public void GetHit()
+	protected override void FixedUpdate()
 	{
-		Debug.Log ("FUUUUUUUCK");
+		base.FixedUpdate();
+		if(grounded && !Physics2D.OverlapCircle(fallCheck.position, 0.04f, whatIsGround))
+			move = -move;
+	}
+
+	public override void GetHit()
+	{
 		gameObject.SetActive(false);
 	}
 
 	protected override bool GetJumpInput ()
 	{
-		return false;
+		return (Random.value < 0.8f);
 	}
 
 	protected override bool GetJumpInputDown ()
 	{
-		return false;
+		return (jumpCheck.OverlapPoint(JumperPlayer.position)
+		        || kickdownCheck.OverlapPoint(JumperPlayer.position));
 	}
 
 	protected override float GetHorizontalInput ()
 	{
-		return 0;
+		return move;
 	}
 	
 }

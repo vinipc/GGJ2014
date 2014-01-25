@@ -3,6 +3,13 @@ using System.Collections;
 
 public class JumperPlayer : JumperController {
 	public Collider2D footCollider;
+	public static Vector3 position;
+
+	protected override void Update ()
+	{
+		base.Update();
+		position = transform.position;
+	}
 
 	protected override float GetHorizontalInput ()
 	{
@@ -19,15 +26,9 @@ public class JumperPlayer : JumperController {
 		return Input.GetButtonDown("Jump");
 	}
 
-	void OnCollisionEnter2D(Collision2D collision)
+	public override void GetHit()
 	{
-		JumperNPC enemy = collision.collider.GetComponent<JumperNPC>();
-		if(enemy == null)
-			return;
-
-		if(transform.position.y > collision.collider.transform.position.y + 0.5f)
-		{
-				enemy.GetHit();
-		}
+		gameObject.SetActive(false);
 	}
+	
 }
