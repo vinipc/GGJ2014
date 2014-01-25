@@ -193,6 +193,7 @@ public abstract class SwordController : MonoBehaviour {
 				Death ();
 			disabled = false;
 			disableTime = 0;
+			anim.SetBool("Disabled", false);
 			gotHit = true;
 			return false;
 		}
@@ -201,7 +202,7 @@ public abstract class SwordController : MonoBehaviour {
 	public void GotBashed ()
 	{
 		disabled = true;
-		disableTime = 0.4f;
+		disableTime = 2.4f;
 		anim.SetBool("Disabled", true);
 		attacking = false;
 	}

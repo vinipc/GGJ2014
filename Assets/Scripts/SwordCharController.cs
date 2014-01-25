@@ -50,6 +50,5 @@ public class SwordCharController : SwordController {
 
 	protected override void Death ()
 	{
-		throw new System.NotImplementedException ();
 	}
 }

@@ -98,6 +98,5 @@ public class SwordAIController : SwordController {
 	
 	protected override void Death ()
 	{
-		print ("So long fuckers");
 	}
 }
