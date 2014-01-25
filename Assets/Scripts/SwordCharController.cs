@@ -9,11 +9,24 @@ public class SwordCharController : SwordController {
 		SwordCharController.playerPos = transform;
 	}
 
-	void Update()
+	protected override void Start ()
 	{
+		hp = 3;
+		base.Start ();
+	}
+
+	protected override void Update()
+	{
+		base.Update();
+
 		if(Input.GetButtonDown("Jump") && grounded)
 		{
 			StartCoroutine("Jump");
+		}
+
+		else if (Input.GetButtonDown("Fire1"))
+		{
+			Atk();
 		}
 	}
 	
@@ -25,5 +38,10 @@ public class SwordCharController : SwordController {
 	protected override bool JumpInputMethod ()
 	{
 		return Input.GetButton("Jump");
+	}
+
+	protected override void Death ()
+	{
+		throw new System.NotImplementedException ();
 	}
 }

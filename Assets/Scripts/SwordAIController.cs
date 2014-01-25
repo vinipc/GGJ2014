@@ -8,9 +8,17 @@ public class SwordAIController : SwordController {
 	public float atkDistance = 2f;
 	public Transform forwardCheck;
 	float distance;
-	
-	void Update()
+
+	protected override void Start ()
 	{
+		hp = 1;
+		base.Start ();
+	}
+
+	protected override void Update()
+	{
+		base.Update();
+
 		distance = (transform.position - SwordCharController.playerPos.position).sqrMagnitude;
 		if(Input.GetButtonDown("Jump") && grounded && distance < minDistance)
 		{
@@ -57,5 +65,10 @@ public class SwordAIController : SwordController {
 			return Input.GetButton("Jump");
 		else
 			return false;
+	}
+	
+	protected override void Death ()
+	{
+		print ("So long fuckers");
 	}
 }

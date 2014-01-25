@@ -15,13 +15,42 @@ public abstract class SwordController : MonoBehaviour {
 	public LayerMask whatIsGround;
 	protected bool grounded;
 
-	//Animator anim;
+	Collider2D sword;
 
-	void Start()
+	protected bool attacking;
+	float atkTime;
+	public float atkStart;
+	public float atkStop;
+
+	protected bool defending;
+	float bashTime;
+
+	protected int hp;
+
+	Animator anim;
+
+	protected virtual void Start()
 	{
-		//anim = GetComponent<Animator>();
+		anim = GetComponent<Animator>();
+		sword = transform.FindChild("Sword").collider2D;
 	}
-	
+
+	protected virtual void Update ()
+	{
+		if (attacking)
+		{
+			atkTime += Time.deltaTime;
+			if (atkTime > atkStop)
+			{
+				sword.enabled = false;
+				attacking = false;
+			}
+			else if (atkTime > atkStart && !sword.enabled)
+				sword.enabled = true;
+		}
+	}
+
+
 	protected abstract float HorizontalInputMethod ();
 
 	protected virtual void FixedUpdate () 
@@ -30,7 +59,7 @@ public abstract class SwordController : MonoBehaviour {
 
 		float move = HorizontalInputMethod();
 
-		//anim.SetFloat("Speed", Mathf.Abs(move));
+		anim.SetFloat("XSpd", Mathf.Abs(move));
 
 		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 
@@ -38,7 +67,6 @@ public abstract class SwordController : MonoBehaviour {
 			Flip();
 		else if (move < 0 && !facingLeft)
 			Flip();
-
 	}
 
 	protected abstract bool JumpInputMethod ();
@@ -65,5 +93,26 @@ public abstract class SwordController : MonoBehaviour {
 		Vector3 temp = transform.localScale;
 		temp.x = - temp.x;
 		transform.localScale = temp;
+	}
+
+	protected void Atk ()
+	{
+		anim.SetTrigger("Atk");
+		attacking = true;
+		atkTime = 0;
+	}
+
+	protected abstract void Death ();
+
+	public void GotHit()
+	{
+		if (defending)
+			bashTime = 0.3f;
+		else
+		{
+			hp --;
+			if (hp <= 0)
+				Death ();
+		}
 	}
 }
