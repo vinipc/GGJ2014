@@ -22,18 +22,18 @@ public class JumperNPC : JumperController {
 
 	public override void GetHit()
 	{
-		gameObject.SetActive(false);
+		Destroy(gameObject);
 	}
 
 	protected override bool GetJumpInput ()
 	{
-		return (Random.value < 0.8f);
+		return (Random.value < 0.9f);
 	}
 
 	protected override bool GetJumpInputDown ()
 	{
-		return (jumpCheck.OverlapPoint(JumperPlayer.position)
-		        || kickdownCheck.OverlapPoint(JumperPlayer.position));
+		return ((jumpCheck.OverlapPoint(JumperPlayer.position) && Random.value < 0.08f)
+		        || (kickdownCheck.OverlapPoint(JumperPlayer.position) && Random.value < 0.1f));
 	}
 
 	protected override float GetHorizontalInput ()

@@ -31,6 +31,9 @@ public abstract class JumperController : MonoBehaviour {
 		
 		if(attachCamera)
 			Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, Camera.main.transform.position.z);
+
+		if(Input.GetKeyDown (KeyCode.R))
+			Application.LoadLevel("Jumper");
 	}
 
 	protected virtual void FixedUpdate () 
@@ -69,12 +72,17 @@ public abstract class JumperController : MonoBehaviour {
 
 	void OnCollisionEnter2D(Collision2D collision)
 	{
+		print ("On Col Enter");
 		JumperController otherJumper = collision.collider.GetComponent<JumperController>();
 		if(otherJumper == null)
 			return;
+
+		print("Collided with jumper");
 		
-		if(transform.position.y > collision.collider.transform.position.y + 0.5f)
+		if(transform.position.y > collision.collider.transform.position.y + 0.5f
+		   && rigidbody2D.velocity.y < 0f)
 		{
+			print ("Hit Head");
 			otherJumper.GetHit();
 		}
 	}
