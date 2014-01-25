@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlatformCharController : MonoBehaviour {
+public abstract class JumperController : MonoBehaviour {
 
 	public float maxSpeed = 10f;
 	public float groundRadius = 0.04f;
@@ -15,22 +15,18 @@ public class PlatformCharController : MonoBehaviour {
 
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
-	bool grounded;
+	protected bool grounded;
 
-	Animator anim;
-
-	void Start()
+	protected virtual void Update()
 	{
-		anim = GetComponent<Animator>();
-	}
-
-	void Update()
-	{
-		if(Input.GetButtonDown("Jump") && grounded)
+		if(GetJumpInputDown())
 		{
-			StartCoroutine("Jump");
+			if(grounded)
+				StartCoroutine("Jump");
+			else
+				Kickdown();
 		}
-
+		
 		if(attachCamera)
 			Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, Camera.main.transform.position.z);
 	}
@@ -39,9 +35,7 @@ public class PlatformCharController : MonoBehaviour {
 	{
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
 
-		float move = Input.GetAxis ("Horizontal");
-
-		anim.SetFloat("Speed", Mathf.Abs(move));
+		float move = GetHorizontalInput();
 
 		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 
@@ -63,9 +57,14 @@ public class PlatformCharController : MonoBehaviour {
 			airTime += Time.deltaTime;
 			yield return new WaitForEndOfFrame();
 		}
-		while (Input.GetButton("Jump") && airTime < maxAirTime);
+		while (GetJumpInput() && airTime < maxAirTime);
 
 		rigidbody2D.AddForce(new Vector2(0, -jumpForce/2));
+	}
+
+	protected void Kickdown()
+	{
+		rigidbody2D.AddForce (new Vector2(0, -2f*jumpForce));
 	}
 	
 	void Flip()
@@ -75,4 +74,8 @@ public class PlatformCharController : MonoBehaviour {
 		temp.x = - temp.x;
 		transform.localScale = temp;
 	}
+
+	protected abstract bool GetJumpInput();
+	protected abstract bool GetJumpInputDown();
+	protected abstract float GetHorizontalInput();
 }
