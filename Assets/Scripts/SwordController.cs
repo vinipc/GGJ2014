@@ -1,47 +1,36 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlatformCharController : MonoBehaviour {
+public abstract class SwordController : MonoBehaviour {
 
 	public float maxSpeed = 10f;
 	public float groundRadius = 0.04f;
-	public float jumpForce = 650f;
+	public float jumpForce = 550f;
 	public float maxAirTime = 0.3f;
 	public float jumpHoldFactor = 15f;
 
-	public bool attachCamera = false;
-
-	bool facingLeft;
+	protected bool facingLeft;
 
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
-	bool grounded;
+	protected bool grounded;
 
-	Animator anim;
+	//Animator anim;
 
 	void Start()
 	{
-		anim = GetComponent<Animator>();
+		//anim = GetComponent<Animator>();
 	}
+	
+	protected abstract float HorizontalInputMethod ();
 
-	void Update()
-	{
-		if(Input.GetButtonDown("Jump") && grounded)
-		{
-			StartCoroutine("Jump");
-		}
-
-		if(attachCamera)
-			Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, Camera.main.transform.position.z);
-	}
-
-	void FixedUpdate () 
+	protected virtual void FixedUpdate () 
 	{
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
 
-		float move = Input.GetAxis ("Horizontal");
+		float move = HorizontalInputMethod();
 
-		anim.SetFloat("Speed", Mathf.Abs(move));
+		//anim.SetFloat("Speed", Mathf.Abs(move));
 
 		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 
@@ -51,6 +40,8 @@ public class PlatformCharController : MonoBehaviour {
 			Flip();
 
 	}
+
+	protected abstract bool JumpInputMethod ();
 
 	IEnumerator Jump()
 	{
@@ -63,7 +54,7 @@ public class PlatformCharController : MonoBehaviour {
 			airTime += Time.deltaTime;
 			yield return new WaitForEndOfFrame();
 		}
-		while (Input.GetButton("Jump") && airTime < maxAirTime);
+		while (JumpInputMethod() && airTime < maxAirTime);
 
 		rigidbody2D.AddForce(new Vector2(0, -jumpForce/2));
 	}
