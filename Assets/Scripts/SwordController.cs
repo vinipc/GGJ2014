@@ -81,6 +81,7 @@ public abstract class SwordController : MonoBehaviour {
 	protected virtual void FixedUpdate () 
 	{
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+		anim.SetBool("Grounded", grounded);
 		float move;
 		if (attacking || disabled || defending || bashing)
 			move = 0;
@@ -88,7 +89,6 @@ public abstract class SwordController : MonoBehaviour {
 			move = HorizontalInputMethod();
 
 		anim.SetFloat("XSpd", Mathf.Abs(move));
-		anim.SetFloat("YSpd", Mathf.Abs(rigidbody2D.velocity.y));
 
 		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 

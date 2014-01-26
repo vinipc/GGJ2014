@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ba06197fb95a9894d819a18cd4e8b10e
+guid: 83471dfa22432af4ba767b4b4699ce4c
 TextureImporter:
   serializedVersion: 2
   mipmaps:
@@ -21,21 +21,21 @@ TextureImporter:
   generateCubemap: 0
   seamlessCubemap: 0
   textureFormat: -1
-  maxTextureSize: 1024
+  maxTextureSize: 2048
   textureSettings:
     filterMode: -1
-    aniso: -1
+    aniso: 1
     mipBias: -1
-    wrapMode: -1
+    wrapMode: 1
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: .5, y: .5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 200
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings:
@@ -44,6 +44,24 @@ TextureImporter:
     textureFormat: -2
     compressionQuality: 50
   spriteSheet:
-    sprites: []
+    sprites:
+    - name: CharIdle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 416
+        width: 990
+        height: 608
+      alignment: 0
+      pivot: {x: 0, y: 0}
+    - name: CharIdle_1
+      rect:
+        serializedVersion: 2
+        x: 990
+        y: 416
+        width: 990
+        height: 608
+      alignment: 0
+      pivot: {x: 0, y: 0}
   spritePackingTag: 
   userData: 
