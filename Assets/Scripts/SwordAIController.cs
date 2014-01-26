@@ -66,13 +66,31 @@ public class SwordAIController : SwordController {
 		float move = 0;
 
 		if (distance < atkDistance)
-			move = 0;
+		{
+			if (SwordCharController.instance.grounded)
+			{
+				if (transform.position.x > SwordCharController.instance.transform.position.x)
+				{
+					if (!facingLeft)
+						Flip();
+				}
+				else
+				{
+					if (facingLeft)
+						Flip();
+				}
+			}
+		}
 		else if (distance < minDistance)
 		{
 			if (transform.position.x > SwordCharController.instance.transform.position.x)
 				move = -1;
 			else
 				move = 1;
+
+			if ((move == -1 && facingLeft) || (move == 1 && !facingLeft))
+				if (!Physics2D.OverlapCircle(forwardCheck.position, groundRadius, whatIsGround))
+					move = 0;
 		}
 		else if(distance < maxDistance)
 		{
@@ -98,5 +116,6 @@ public class SwordAIController : SwordController {
 	
 	protected override void Death ()
 	{
+		Destroy(gameObject);
 	}
 }

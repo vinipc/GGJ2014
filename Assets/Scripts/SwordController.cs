@@ -14,6 +14,9 @@ public abstract class SwordController : MonoBehaviour {
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
 	public bool grounded;
+	
+	public LayerMask doNotStep;
+	public float pushForce;
 
 	Collider2D sword;
 
@@ -32,6 +35,7 @@ public abstract class SwordController : MonoBehaviour {
 
 	public int hp;
 	public bool gotHit;
+	public float hitTime;
 
 	public bool jumping;
 
@@ -45,6 +49,21 @@ public abstract class SwordController : MonoBehaviour {
 
 	protected virtual void Update ()
 	{
+		if (gotHit)
+		{
+			hitTime -= Time.deltaTime;
+			if ((hitTime % 1) > 0.8)
+				renderer.enabled = false;
+			else
+				renderer.enabled = true;
+
+			if (hitTime < 0)
+			{
+				renderer.enabled = true;
+				gotHit = false;
+			}
+		}
+
 		if (attacking)
 		{
 			atkTime += Time.deltaTime;
@@ -63,7 +82,10 @@ public abstract class SwordController : MonoBehaviour {
 		{
 			bashTime -= Time.deltaTime;
 			if (bashTime < 0)
+			{
+				anim.SetBool("Bash", false);
 				bashing = false;
+			}
 		}
 		else if (disabled)
 		{
@@ -126,7 +148,7 @@ public abstract class SwordController : MonoBehaviour {
 		rigidbody2D.AddForce(new Vector2(0, -jumpForce/2));
 	}
 	
-	void Flip()
+	protected void Flip()
 	{
 		facingLeft = !facingLeft;
 		Vector3 temp = transform.localScale;
@@ -164,7 +186,7 @@ public abstract class SwordController : MonoBehaviour {
 		if (!defending)
 			return;
 		
-		anim.SetTrigger("Bash");
+		anim.SetBool("Bash", true);
 		anim.SetBool("Def", false);
 		defending = false;
 		bashing = true;
@@ -177,9 +199,9 @@ public abstract class SwordController : MonoBehaviour {
 	{
 	}
 
-	public bool GotHit()
+	public bool GotHit(bool faceLeft)
 	{
-		if (defending)
+		if (defending && faceLeft != facingLeft)
 			return false;
 		else if (bashTime > 0)
 		{
@@ -195,6 +217,7 @@ public abstract class SwordController : MonoBehaviour {
 			disableTime = 0;
 			anim.SetBool("Disabled", false);
 			gotHit = true;
+			hitTime = 3f;
 			return false;
 		}
 	}

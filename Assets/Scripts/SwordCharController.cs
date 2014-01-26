@@ -28,7 +28,7 @@ public class SwordCharController : SwordController {
 		{
 			Atk();
 		}
-		else if (Input.GetButtonDown("Fire2"))
+		else if (Input.GetButton("Fire2") && !defending)
 		{
 			Defend();
 		}
