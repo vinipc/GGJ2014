@@ -52,6 +52,6 @@ public class SwordCharController : SwordController {
 
 	protected override void Death ()
 	{
-		Application.LoadLevel("GameOver");
+		Application.LoadLevel("GameOverSword");
 	}
 }
