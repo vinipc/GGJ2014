@@ -25,7 +25,8 @@ public abstract class SwordController : MonoBehaviour {
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
 	public bool grounded;
-
+	
+	public Collider2D top;
 	Collider2D sword;
 	public Transform center;
 
@@ -135,6 +136,9 @@ public abstract class SwordController : MonoBehaviour {
 			player.Play();
 		}
 
+		if (grounded && (Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround) as Collider2D).gameObject.tag == "movingPlatform")
+			rigidbody2D.velocity = new Vector2(0,-5);
+
 		anim.SetBool("Grounded", grounded);
 		float move;
 		if (attacking || disabled || bashing)
@@ -185,6 +189,7 @@ public abstract class SwordController : MonoBehaviour {
 		player.Play();
 		jumping = true;
 		float airTime = 0f;
+		rigidbody2D.velocity = Vector2.zero;
 		rigidbody2D.AddForce(new Vector2(0, jumpForce));
 
 		do
@@ -250,6 +255,7 @@ public abstract class SwordController : MonoBehaviour {
 
 	void StartDying ()
 	{
+		top.enabled = false;
 		collider2D.enabled = false;
 		transform.FindChild("Shield").collider2D.enabled = false;
 		rigidbody2D.gravityScale = 0;
