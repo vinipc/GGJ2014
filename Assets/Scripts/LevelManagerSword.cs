@@ -25,4 +25,15 @@ public class LevelManagerSword: MonoBehaviour {
 		
 		exitPortal.position = exit.position;
 	}
+	
+	void Update()
+	{
+		if(exitPortal.collider2D.OverlapPoint(JumperPlayer.position))
+		{
+			if (Random.value > 0.5)
+				Application.LoadLevel (Application.loadedLevel);
+			else
+				Application.LoadLevel ("JumperMap");
+		}
+	}
 }

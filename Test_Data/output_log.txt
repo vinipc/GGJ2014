@@ -9,27 +9,19 @@ Direct3D:
 Begin MonoManager ReloadAssembly
 Platform assembly: C:\Users\Arthur\Desktop\GGJ2014\Test_Data\Managed\UnityEngine.dll (this message is harmless)
 Loading C:\Users\Arthur\Desktop\GGJ2014\Test_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Arthur\Desktop\GGJ2014\Test_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\Arthur\Desktop\GGJ2014\Test_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
 Platform assembly: C:\Users\Arthur\Desktop\GGJ2014\Test_Data\Managed\Assembly-CSharp.dll (this message is harmless)
 Loading C:\Users\Arthur\Desktop\GGJ2014\Test_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
-- Completed reload, in  0.069 seconds
+- Completed reload, in  0.065 seconds
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
-HandleD3DDeviceLost
-  HandleD3DDeviceLost: still lost
-Skipped rendering frame because GfxDevice is in invalid state (device lost)
- 
-(Filename: C:/BuildAgent/work/d3d49558e4d408f4/Runtime/Misc/Player.cpp Line: 1539)
+UnloadTime: 0.454450 ms
+System memory in use before: 20.3 MB.
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0 / Dirty serialized files: 0)
+System memory in use after: 20.2 MB.
 
-HandleD3DDeviceLost
-  HandleD3DDeviceLost: still lost
-Skipped rendering frame because GfxDevice is in invalid state (device lost)
- 
-(Filename: C:/BuildAgent/work/d3d49558e4d408f4/Runtime/Misc/Player.cpp Line: 1539)
-
-HandleD3DDeviceLost
-  HandleD3DDeviceLost: still lost
-Skipped rendering frame because GfxDevice is in invalid state (device lost)
- 
-(Filename: C:/BuildAgent/work/d3d49558e4d408f4/Runtime/Misc/Player.cpp Line: 1539)
+Unloading 8 unused Assets to reduce memory usage. Loaded Objects now: 453.
+Total: 1.452435 ms (FindLiveObjects: 0.031199 ms CreateObjectMapping: 0.009442 ms MarkObjects: 0.112483 ms  DeleteObjects: 0.038589 ms)
 
