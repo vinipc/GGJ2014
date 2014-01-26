@@ -8,18 +8,36 @@ public abstract class JumperController : MonoBehaviour {
 	public float jumpForce = 650f;
 	public float maxAirTime = 0.3f;
 	public float jumpHoldFactor = 15f;
-
-	public bool attachCamera = false;
+	public PhysicsMaterial2D headMaterial;
 
 	bool facingLeft;
 
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
 	protected bool grounded;
+	protected bool attacking;
+
+	public Collider2D jumpAttack;
+
+	protected Animator anim;
+
+	protected virtual void Start()
+	{
+		anim = GetComponent<Animator>();
+	}
 
 	protected virtual void Update()
 	{
+		anim.SetFloat("speed", Mathf.Abs(GetHorizontalInput()));
+
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+		jumpAttack.enabled = !grounded;
+		if(grounded && attacking)
+			attacking = false;
+
+		anim.SetBool("grounded", grounded);
+		if(!grounded)
+			anim.SetBool("attacking", attacking);
 
 		if(GetJumpInputDown())
 		{
@@ -28,9 +46,6 @@ public abstract class JumperController : MonoBehaviour {
 			else
 				Kickdown();
 		}
-		
-		if(attachCamera)
-			Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, Camera.main.transform.position.z);
 
 		if(Input.GetKeyDown (KeyCode.R))
 			Application.LoadLevel("Jumper");
@@ -40,7 +55,8 @@ public abstract class JumperController : MonoBehaviour {
 	{
 		float move = GetHorizontalInput();
 
-		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
+		if(!attacking)
+			rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 
 		if(move > 0 && facingLeft)
 			Flip();
@@ -67,25 +83,24 @@ public abstract class JumperController : MonoBehaviour {
 
 	protected void Kickdown()
 	{
+		rigidbody2D.velocity = Vector2.zero;
+		attacking = true;
 		rigidbody2D.AddForce (new Vector2(0, -2f*jumpForce));
 	}
 
-	void OnCollisionEnter2D(Collision2D collision)
-	{
-		print ("On Col Enter");
-		JumperController otherJumper = collision.collider.GetComponent<JumperController>();
-		if(otherJumper == null)
-			return;
-
-		print("Collided with jumper");
-		
-		if(transform.position.y > collision.collider.transform.position.y + 0.5f
-		   && rigidbody2D.velocity.y < 0f)
-		{
-			print ("Hit Head");
-			otherJumper.GetHit();
-		}
-	}
+//	void OnCollisionEnter2D(Collision2D collision)
+//	{
+//		JumperController otherJumper = collision.collider.GetComponent<JumperController>();
+//		if(otherJumper == null)
+//			return;
+//
+//		if(rigidbody2D.velocity.y >= -0.08f)
+//		{
+//			return;
+//		}
+//
+//		otherJumper.GetHit();
+//	}
 
 	void Flip()
 	{
