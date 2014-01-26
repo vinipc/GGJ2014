@@ -7,12 +7,16 @@ public class SwordAIController : SwordController {
 	public float minDistance = 100f;
 	public float atkDistance = 2f;
 	public Transform forwardCheck;
+	public Transform backwardCheck;
+	public Transform backWall;
 	float distance;
 
 	public float defTime;
 	public float atkChance;
 	public bool mustAtk;
 	public float defendChance;
+
+	public bool deleteOnKill;
 
 	protected override void Start ()
 	{
@@ -22,7 +26,10 @@ public class SwordAIController : SwordController {
 
 	void LateUpdate ()
 	{
-		distance = (transform.position - SwordCharController.instance.transform.position).sqrMagnitude;
+		if (dying)
+			return;
+
+		distance = (transform.position - SwordCharController.instance.center.position).sqrMagnitude;
 		if(SwordCharController.instance.grounded && Input.GetButtonDown("Jump") && SwordCharController.instance.jumping && distance < minDistance)
 		{
 			StartCoroutine("Jump");
@@ -57,7 +64,7 @@ public class SwordAIController : SwordController {
 
 	protected override void FixedUpdate()
 	{
-		distance = (transform.position - SwordCharController.instance.transform.position).sqrMagnitude;
+		distance = (transform.position - SwordCharController.instance.center.position).sqrMagnitude;
 		base.FixedUpdate();
 	}
 
@@ -69,7 +76,7 @@ public class SwordAIController : SwordController {
 		{
 			if (SwordCharController.instance.grounded)
 			{
-				if (transform.position.x > SwordCharController.instance.transform.position.x)
+				if (transform.position.x > SwordCharController.instance.center.position.x)
 				{
 					if (!facingLeft)
 						Flip();
@@ -83,14 +90,21 @@ public class SwordAIController : SwordController {
 		}
 		else if (distance < minDistance)
 		{
-			if (transform.position.x > SwordCharController.instance.transform.position.x)
+			if (transform.position.x > SwordCharController.instance.center.position.x)
 				move = -1;
 			else
 				move = 1;
 
 			if ((move == -1 && facingLeft) || (move == 1 && !facingLeft))
-				if (!Physics2D.OverlapCircle(forwardCheck.position, groundRadius, whatIsGround))
+			{
+				if (!Physics2D.OverlapCircle(forwardCheck.position, groundRadius, whatIsGround) || Physics2D.OverlapCircle(wallCheck.position, groundRadius, whatIsGround))
 					move = 0;
+			}
+			else
+			{
+				if (!Physics2D.OverlapCircle(backwardCheck.position, groundRadius, whatIsGround) || Physics2D.OverlapCircle(backWall.position, groundRadius, whatIsGround))
+				    move = 0;
+			}
 		}
 		else if(distance < maxDistance)
 		{
@@ -99,7 +113,7 @@ public class SwordAIController : SwordController {
 			else
 				move = 1;
 
-			if (!Physics2D.OverlapCircle(forwardCheck.position, groundRadius, whatIsGround))
+			if (!Physics2D.OverlapCircle(forwardCheck.position, groundRadius, whatIsGround) || Physics2D.OverlapCircle(wallCheck.position, groundRadius, whatIsGround))
 				move *= -1;
 		}
 
@@ -116,6 +130,9 @@ public class SwordAIController : SwordController {
 	
 	protected override void Death ()
 	{
-		Destroy(gameObject);
+		if (deleteOnKill)
+			Destroy(gameObject);
+		else
+			Spawner.instance.ReturnObj(gameObject);
 	}
 }

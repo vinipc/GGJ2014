@@ -18,6 +18,8 @@ public class SwordCharController : SwordController {
 	protected override void Update()
 	{
 		base.Update();
+		if (dying)
+			return;
 
 		if(Input.GetButtonDown("Jump"))
 		{

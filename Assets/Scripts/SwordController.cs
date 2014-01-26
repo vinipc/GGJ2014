@@ -2,7 +2,17 @@
 using System.Collections;
 
 public abstract class SwordController : MonoBehaviour {
-
+	
+	public AudioClip jumpA;
+	public AudioClip fallA;
+	public AudioClip hitA;
+	public AudioClip getHitA;
+	public AudioClip dieA;
+	public AudioClip bashA;
+	public AudioClip blockA;
+	public AudioSource player;
+	public AudioSource looper;
+		
 	public float maxSpeed = 10f;
 	public float groundRadius = 0.04f;
 	public float jumpForce = 550f;
@@ -10,15 +20,14 @@ public abstract class SwordController : MonoBehaviour {
 	public float jumpHoldFactor = 15f;
 
 	public bool facingLeft;
-
+	
+	public Transform wallCheck;
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
 	public bool grounded;
-	
-	public LayerMask doNotStep;
-	public float pushForce;
 
 	Collider2D sword;
+	public Transform center;
 
 	public bool attacking;
 	public bool atkSet;
@@ -38,6 +47,8 @@ public abstract class SwordController : MonoBehaviour {
 	public float hitTime;
 
 	public bool jumping;
+	public bool dying;
+	public float deathTime;
 
 	Animator anim;
 
@@ -45,10 +56,19 @@ public abstract class SwordController : MonoBehaviour {
 	{
 		anim = GetComponent<Animator>();
 		sword = transform.FindChild("Sword").collider2D;
+		center = transform.FindChild("Center").transform;
 	}
 
 	protected virtual void Update ()
 	{
+		if (dying)
+		{
+			deathTime -= Time.deltaTime;
+			if (deathTime <= 0)
+				Death ();
+			return;
+		}
+
 		if (gotHit)
 		{
 			hitTime -= Time.deltaTime;
@@ -74,6 +94,8 @@ public abstract class SwordController : MonoBehaviour {
 			}
 			else if (atkTime > atkStart && !sword.enabled && !atkSet)
 			{
+				player.clip = hitA;
+				player.Play();
 				sword.enabled = true;
 				atkSet = true;
 			}
@@ -102,22 +124,49 @@ public abstract class SwordController : MonoBehaviour {
 
 	protected virtual void FixedUpdate () 
 	{
+		if (dying)
+			return;
+
+		bool aux = grounded;
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+		if (grounded && !aux)
+		{
+			player.clip = fallA;
+			player.Play();
+		}
+
 		anim.SetBool("Grounded", grounded);
 		float move;
-		if (attacking || disabled || defending || bashing)
+		if (attacking || disabled || bashing)
 			move = 0;
 		else
 			move = HorizontalInputMethod();
 
-		anim.SetFloat("XSpd", Mathf.Abs(move));
-
-		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
+		if (Physics2D.OverlapCircle(wallCheck.position, groundRadius, whatIsGround))
+		{
+			if ((move < 0 && facingLeft) || (move > 0 && !facingLeft))
+				move = 0;
+		}
 
 		if(move > 0 && facingLeft)
 			Flip();
 		else if (move < 0 && !facingLeft)
 			Flip();
+
+		if (defending)
+			move = 0;
+
+		if (grounded && move != 0)
+		{
+			if (!looper.isPlaying)
+				looper.Play();
+		}
+		else if (looper.isPlaying)
+			looper.Stop();
+
+		anim.SetFloat("XSpd", Mathf.Abs(move));
+
+		rigidbody2D.velocity = new Vector2(move * maxSpeed, rigidbody2D.velocity.y);
 	}
 
 	protected abstract bool JumpInputMethod ();
@@ -132,6 +181,8 @@ public abstract class SwordController : MonoBehaviour {
 			anim.SetBool("Def", false);
 		}
 
+		player.clip = jumpA;
+		player.Play();
 		jumping = true;
 		float airTime = 0f;
 		rigidbody2D.AddForce(new Vector2(0, jumpForce));
@@ -151,9 +202,13 @@ public abstract class SwordController : MonoBehaviour {
 	protected void Flip()
 	{
 		facingLeft = !facingLeft;
+		Vector3 aux = center.position;
 		Vector3 temp = transform.localScale;
 		temp.x = - temp.x;
 		transform.localScale = temp;
+
+		aux = aux - center.position;
+		transform.position += aux;
 	}
 
 	protected void Atk ()
@@ -193,6 +248,20 @@ public abstract class SwordController : MonoBehaviour {
 		bashTime = 0.5f;
 	}
 
+	void StartDying ()
+	{
+		collider2D.enabled = false;
+		transform.FindChild("Shield").collider2D.enabled = false;
+		rigidbody2D.gravityScale = 0;
+		transform.FindChild("GroundCheck").collider2D.enabled = false;
+		renderer.enabled = true;
+
+		anim.SetTrigger("Death");
+		dying = true;
+		player.clip = dieA;
+		player.Play();
+	}
+
 	protected abstract void Death ();
 
 	protected virtual void Bashed ()
@@ -202,9 +271,15 @@ public abstract class SwordController : MonoBehaviour {
 	public bool GotHit(bool faceLeft)
 	{
 		if (defending && faceLeft != facingLeft)
+		{
+			player.clip = blockA;
+			player.Play();
 			return false;
+		}
 		else if (bashTime > 0)
 		{
+			player.clip = bashA;
+			player.Play();
 			Bashed ();
 			return true;
 		}
@@ -212,7 +287,12 @@ public abstract class SwordController : MonoBehaviour {
 		{
 			hp --;
 			if (hp <= 0)
-				Death ();
+				StartDying ();
+			else
+			{
+				player.clip = getHitA;
+				player.Play();
+			}
 			disabled = false;
 			disableTime = 0;
 			anim.SetBool("Disabled", false);
