@@ -14,8 +14,8 @@ public abstract class JumperController : MonoBehaviour {
 
 	public Transform groundCheck;
 	public LayerMask whatIsGround;
-	protected bool grounded;
-	protected bool attacking;
+	public bool grounded;
+	public bool attacking;
 
 	public Collider2D jumpAttack;
 
@@ -43,12 +43,12 @@ public abstract class JumperController : MonoBehaviour {
 		{
 			if(grounded)
 				StartCoroutine("Jump");
-			else
+			else if (!attacking)
 				Kickdown();
 		}
 
 		if(Input.GetKeyDown (KeyCode.R))
-			Application.LoadLevel("Jumper");
+			Application.LoadLevel(Application.loadedLevel);
 	}
 
 	protected virtual void FixedUpdate () 
@@ -67,6 +67,7 @@ public abstract class JumperController : MonoBehaviour {
 
 	IEnumerator Jump()
 	{
+		grounded = false;
 		float airTime = 0f;
 		rigidbody2D.AddForce(new Vector2(0, jumpForce));
 
@@ -87,20 +88,6 @@ public abstract class JumperController : MonoBehaviour {
 		attacking = true;
 		rigidbody2D.AddForce (new Vector2(0, -2f*jumpForce));
 	}
-
-//	void OnCollisionEnter2D(Collision2D collision)
-//	{
-//		JumperController otherJumper = collision.collider.GetComponent<JumperController>();
-//		if(otherJumper == null)
-//			return;
-//
-//		if(rigidbody2D.velocity.y >= -0.08f)
-//		{
-//			return;
-//		}
-//
-//		otherJumper.GetHit();
-//	}
 
 	void Flip()
 	{

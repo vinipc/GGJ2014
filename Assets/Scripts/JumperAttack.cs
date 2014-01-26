@@ -7,9 +7,8 @@ public class JumperAttack : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D otherCollider)
 	{
-		print (otherCollider);
 		JumperController otherJumper = otherCollider.GetComponent<JumperController>();
 		otherJumper.GetHit();
+		transform.parent.GetComponent<JumperController>().attacking = false;
 	}
-
 }
