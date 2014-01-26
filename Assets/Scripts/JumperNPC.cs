@@ -5,6 +5,9 @@ public class JumperNPC : JumperController {
 	public Transform[] fallCheck;
 	public Collider2D kickdownCheck;
 	public Collider2D jumpCheck;
+	public Transform wallCheck;
+
+	public LayerMask enemyLayer;
 
 	private float move;
 
@@ -23,7 +26,8 @@ public class JumperNPC : JumperController {
 	protected override void FixedUpdate()
 	{
 		base.FixedUpdate();
-		if(grounded && !Physics2D.OverlapCircle(fallCheck[0].position, 0.04f, whatIsGround))
+		if(grounded && (!Physics2D.OverlapCircle(fallCheck[0].position, 0.04f, whatIsGround) || 
+		                Physics2D.OverlapCircle (wallCheck.position, 0.04f, whatIsGround)))
 			move = -move;
 
 		if(Mathf.Abs(JumperPlayer.position.y - transform.position.y) > 0.2f 
@@ -51,6 +55,7 @@ public class JumperNPC : JumperController {
 
 	public override void GetHit()
 	{
+		audio.PlayOneShot(hit);
 		rigidbody2D.velocity = Vector2.zero;
 		move = 0;
 		anim.SetTrigger("death");

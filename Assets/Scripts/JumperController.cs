@@ -4,7 +4,7 @@ using System.Collections;
 public abstract class JumperController : MonoBehaviour {
 
 	public float maxSpeed = 10f;
-	public float groundRadius = 0.04f;
+	public float groundRadius = 0.02f;
 	public float jumpForce = 650f;
 	public float maxAirTime = 0.3f;
 	public float jumpHoldFactor = 15f;
@@ -21,6 +21,10 @@ public abstract class JumperController : MonoBehaviour {
 
 	protected Animator anim;
 
+	public AudioClip jump;
+	public AudioClip hit;
+	public AudioClip kick;
+	
 	protected virtual void Start()
 	{
 		anim = GetComponent<Animator>();
@@ -31,6 +35,10 @@ public abstract class JumperController : MonoBehaviour {
 		anim.SetFloat("speed", Mathf.Abs(GetHorizontalInput()));
 
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+
+		if(grounded && (Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround) as Collider2D).gameObject.tag == "movingPlatform")
+			rigidbody2D.velocity += new Vector2(0, -5);
+
 		jumpAttack.enabled = !grounded;
 		if(grounded && attacking)
 			attacking = false;
@@ -62,13 +70,16 @@ public abstract class JumperController : MonoBehaviour {
 			Flip();
 		else if (move < 0 && !facingLeft)
 			Flip();
-
 	}
 
 	IEnumerator Jump()
 	{
+		if(audio)
+			audio.PlayOneShot(jump);
+
 		grounded = false;
 		float airTime = 0f;
+		rigidbody2D.velocity = Vector2.zero;
 		rigidbody2D.AddForce(new Vector2(0, jumpForce));
 
 		do
@@ -84,6 +95,7 @@ public abstract class JumperController : MonoBehaviour {
 
 	protected void Kickdown()
 	{
+		audio.PlayOneShot(kick);
 		rigidbody2D.velocity = Vector2.zero;
 		attacking = true;
 		rigidbody2D.AddForce (new Vector2(0, -2f*jumpForce));

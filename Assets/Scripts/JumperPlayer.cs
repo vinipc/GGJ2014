@@ -2,13 +2,16 @@
 using System.Collections;
 
 public class JumperPlayer : JumperController {
+	public static JumperPlayer instance;
+
 	public static Vector3 position;
 	public static bool staticGrounded;
-	private int lives;
+	public int lives;
 
 	protected override void Start ()
 	{
 		base.Start();
+		instance = this;
 		lives = 3;
 	}
 
@@ -36,11 +39,24 @@ public class JumperPlayer : JumperController {
 
 	public override void GetHit()
 	{
+		audio.PlayOneShot(hit);
 		lives--;
+		StartCoroutine("Blink");
 		if(lives == 0)
 		{
 			position = transform.position = Vector3.one * 1000;
 			Destroy (gameObject);
 		}
-	}	
+	}
+
+	IEnumerator Blink()
+	{
+		renderer.enabled = false;
+		yield return new WaitForSeconds(0.1f);
+		renderer.enabled = true;
+		yield return new WaitForSeconds(0.1f);
+		renderer.enabled = false;
+		yield return new WaitForSeconds(0.1f);
+		renderer.enabled = true;
+	}
 }
